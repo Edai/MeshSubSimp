@@ -103,6 +103,14 @@ void Mesh::Save(const char* fileName)
     output.close();
 }
 
+Vector3D Mesh::GetNormalTriangle(Face &f)
+{
+    Vector3D u = verts[f.verts[1]].pos - verts[f.verts[0]].pos;
+    Vector3D v = verts[f.verts[2]].pos - verts[f.verts[0]].pos;
+
+    return Vector3D(u ^ v);
+}
+
 void Mesh::Init()
 {
     glist = glGenLists(1);
@@ -112,6 +120,8 @@ void Mesh::Init()
         for (int i = 0; i < faces.size(); i++)
         {
             glBegin(GL_TRIANGLES);
+            auto n = GetNormalTriangle(faces[i]);
+            glNormal3f(n.x, n.y, n.z);
             for (int j = 0; j < 3; j++)
                 glVertex3f(verts[faces[i].verts[j]].pos.x, verts[faces[i].verts[j]].pos.y, verts[faces[i].verts[j]].pos.z);
         }
@@ -126,12 +136,13 @@ void Mesh::Render()
     static GLfloat rot = 0.0;
 
     glPushMatrix();
-    glTranslatef(0, -2.0f, 5.5f);
-    glColor3f(1.0, 0.33, 0.33);
+    glTranslatef(0, -2.0f, 6.5f);
+    glColor4f(1.0, 0.33, 0.33, 1.0);
     glScalef(0.05,0.05,0.05);
     glRotatef(rot, 0.0,1.0,0.0);
     glCallList(glist);
     glPopMatrix();
+
     rot = rot + 0.6f;
     if (rot > 360)
         rot -= 360;

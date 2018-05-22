@@ -22,6 +22,8 @@ public:
 
     void Load(const char* fileName);
     void Save(const char* fileName);
+    Vector3D GetNormalTriangle(Face &f);
+
     void LoopSubdivisionOneStep();
     void Simplification();
 

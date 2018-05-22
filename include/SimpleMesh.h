@@ -25,6 +25,7 @@ class Face
 {
     public:
         unsigned verts[3];
+
         unsigned vertOppositeTo(unsigned v0, unsigned v1)
         {
             assert(verts[0] == v0 || verts[1] == v0 || verts[2] == v0);

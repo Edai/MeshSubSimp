@@ -17,6 +17,8 @@ class Engine
 public:
     Engine();
     ~Engine() = default;
+    void SetLight(GLfloat* pos);
+
     void Update(float dt);
     static Camera *mainCamera;
 
