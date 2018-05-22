@@ -3,7 +3,8 @@ project(MeshSubSimp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(MeshSubSimp src/main.cpp src/Geometry.cpp include/Geometry.h include/SimpleMesh.h include/Mesh.cpp include/Mesh.hpp)
+add_executable(MeshSubSimp src/main.cpp src/Geometry.cpp include/Geometry.h include/SimpleMesh.h src/Mesh.cpp include/Mesh.hpp
+                include/Application.hpp include/Camera.hpp include/Engine.hpp include/GraphicalCore.hpp src/Application.cpp src/Camera.cpp src/Engine.cpp src/GraphicalCore.cpp)
 
 FIND_PATH(SOIL_INCLUDE_PATH SOIL/SOIL.h
         /usr/include

@@ -14,11 +14,14 @@ public:
     std::vector<Vertex> verts;
     std::vector<Face> faces;
     Edge2Faces edge2Faces;
+    unsigned int glist;
 
 public:
+    void Init();
+    void Render();
+
     void Load(const char* fileName);
     void Save(const char* fileName);
-
     void LoopSubdivisionOneStep();
     void Simplification();
 

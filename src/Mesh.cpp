@@ -2,7 +2,19 @@
 // Created by edai on 21/05/18.
 //
 
+#include "Application.hpp"
 #include "Mesh.hpp"
+
+
+void Mesh::LoopSubdivisionOneStep()
+{
+    return;
+}
+
+void Mesh::Simplification()
+{
+    return;
+}
 
 void Mesh::Load(const char* fileName)
 {
@@ -81,7 +93,6 @@ void Mesh::Load(const char* fileName)
     }
 }
 
-
 void Mesh::Save(const char* fileName)
 {
     std::ofstream output(fileName);
@@ -92,13 +103,36 @@ void Mesh::Save(const char* fileName)
     output.close();
 }
 
-
-void Mesh::LoopSubdivisionOneStep()
+void Mesh::Init()
 {
-    return;
+    glist = glGenLists(1);
+    glNewList(glist, GL_COMPILE);
+    {
+        glPushMatrix();
+        for (int i = 0; i < faces.size(); i++)
+        {
+            glBegin(GL_TRIANGLES);
+            for (int j = 0; j < 3; j++)
+                glVertex3f(verts[faces[i].verts[j]].pos.x, verts[faces[i].verts[j]].pos.y, verts[faces[i].verts[j]].pos.z);
+        }
+        glEnd();
+    }
+    glPopMatrix();
+    glEndList();
 }
 
-void Mesh::Simplification()
+void Mesh::Render()
 {
-    return;
+    static GLfloat rot = 0.0;
+
+    glPushMatrix();
+    glTranslatef(0, -2.0f, 5.5f);
+    glColor3f(1.0, 0.33, 0.33);
+    glScalef(0.05,0.05,0.05);
+    glRotatef(rot, 0.0,1.0,0.0);
+    glCallList(glist);
+    glPopMatrix();
+    rot = rot + 0.6f;
+    if (rot > 360)
+        rot -= 360;
 }
