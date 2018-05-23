@@ -22,7 +22,7 @@
 #define WINDOWPOS_Y 50
 #define WINDOW_TITLE "Valentin KAO - 2017280242"
 #define DEFAULT_OBJ "resources/kitten.obj"
-#define DEFAULT_ITERATIONS 5
+#define DEFAULT_ITERATIONS 2
 
 struct Options
 {
