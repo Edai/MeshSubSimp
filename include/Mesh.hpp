@@ -23,12 +23,12 @@ public:
     void Load(const char* fileName);
     void Save(const char* fileName);
     Vector3D GetNormalTriangle(Face &);
-    Vertex *GetOddVertices(unsigned, unsigned, unsigned, unsigned);
-    void GetTwoOtherVertices(Vertex &v0, Vertex &v1, Vertex &v2, Vertex &v3);
+    Vertex *GetOddVertex(unsigned, unsigned, unsigned, unsigned);
+    Vertex *GetEvenVertex(unsigned, unsigned, unsigned, unsigned);
     void LoopSubdivisionOneStep();
     void Simplification();
 
-    unsigned int GetFourthVertex(unsigned f, unsigned int i0, unsigned int i1);
+    unsigned int odd_GetFourthVertex(unsigned f, unsigned int i0, unsigned int i1);
 };
 
 

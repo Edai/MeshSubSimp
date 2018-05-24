@@ -5,7 +5,7 @@
 #include "Application.hpp"
 #include "Mesh.hpp"
 
-unsigned Mesh::GetFourthVertex(unsigned f, unsigned i0, unsigned i1)
+unsigned Mesh::odd_GetFourthVertex(unsigned f, unsigned i0, unsigned i1)
 {
     for (auto &index : edge2Faces.find(std::make_pair(i0, i1)) == edge2Faces.end() ?
                        edge2Faces[std::make_pair(i1, i0)] : edge2Faces[std::make_pair(i0, i1)])
@@ -20,7 +20,38 @@ unsigned Mesh::GetFourthVertex(unsigned f, unsigned i0, unsigned i1)
     return (0);
 }
 
-Vertex* Mesh::GetOddVertices(unsigned f, unsigned i0, unsigned i1, unsigned i2)
+float beta(int n)
+{
+    if (n == 3)
+        return (3.0f / 16.0f);
+    else
+        return (3.0f / 8.0f * n);
+}
+
+Vertex* Mesh::GetEvenVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
+{
+    Vertex *v = new Vertex();
+    *v = verts[0];
+
+    std::cout << "OLD " << v->pos.x << " "  << v->pos.y << " " << v->pos.z << std::endl;
+    if (v->isBoundary)
+    {
+        v->pos = 1.0/8.0  * (verts[i1].pos  + verts[i2].pos) +
+                3.0/4.0 * v->pos;
+    }
+    else
+    {
+        float sum_beta = 0;
+        for (auto i : v->adjVerts)
+            sum_beta += beta(verts[i].adjVerts.size());
+        v->pos *= (1.0 - v->adjVerts.size() * beta(v->adjVerts.size())) +
+                sum_beta * beta(v->adjVerts.size());
+    }
+    std::cout << "NEW " << v->pos.x << " "  << v->pos.y << " " << v->pos.z << std::endl;
+    return (v);
+}
+
+Vertex* Mesh::GetOddVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
 {
     Vertex *v = new Vertex();
     Vertex &v0 = verts[i0];
@@ -33,12 +64,11 @@ Vertex* Mesh::GetOddVertices(unsigned f, unsigned i0, unsigned i1, unsigned i2)
     }
     else
     {
-        unsigned i3 = GetFourthVertex(f, i0, i1);
+        unsigned i3 = odd_GetFourthVertex(f, i0, i1);
         Vertex &v2 = verts[i2];
         Vertex &v3 = verts[i3];
         v->pos = 3.0/8.0 * (v0.pos + v1.pos) + 1.0/8.0 * (v2.pos + v3.pos);
     }
-    //add faces
     v->adjVerts.push_back(i0);
     v->adjVerts.push_back(i1);
     return (v);
@@ -46,17 +76,20 @@ Vertex* Mesh::GetOddVertices(unsigned f, unsigned i0, unsigned i1, unsigned i2)
 
 void Mesh::LoopSubdivisionOneStep()
 {
-    Mesh *simplified_mesh = new Mesh();
     std::vector<Vertex> *odd_vertexes = new std::vector<Vertex>();
+    std::vector<Vertex> *even_vertexes = new std::vector<Vertex>();
 
     for (int i = 0; i < faces.size(); i++)
     {
         Face &f = faces[i];
         for (auto &v : f.verts)
         {
-            odd_vertexes->push_back(*(GetOddVertices(i, f.verts[0], f.verts[1], f.verts[2])));
-            odd_vertexes->push_back(*(GetOddVertices(i, f.verts[0], f.verts[2], f.verts[1])));
-            odd_vertexes->push_back(*(GetOddVertices(i, f.verts[1], f.verts[2], f.verts[0])));
+            odd_vertexes->push_back(*(GetOddVertex(i, f.verts[0], f.verts[1], f.verts[2])));
+            odd_vertexes->push_back(*(GetOddVertex(i, f.verts[0], f.verts[2], f.verts[1])));
+            odd_vertexes->push_back(*(GetOddVertex(i, f.verts[1], f.verts[2], f.verts[0])));
+            even_vertexes->push_back(*(GetEvenVertex(i, f.verts[0], f.verts[1], f.verts[2])));
+            even_vertexes->push_back(*(GetEvenVertex(i, f.verts[1], f.verts[0], f.verts[2])));
+            even_vertexes->push_back(*(GetEvenVertex(i, f.verts[2], f.verts[0], f.verts[1])));
         }
     }
     delete odd_vertexes;
@@ -125,7 +158,7 @@ void Mesh::Load(const char* fileName)
     for (unsigned i = 0; i < verts.size(); ++i)
     {
         std::set<unsigned> rmRedunt;
-        for (std::list<unsigned>::iterator iter = verts[i].adjVerts.begin();
+        for (std::vector<unsigned>::iterator iter = verts[i].adjVerts.begin();
              iter != verts[i].adjVerts.end(); ++iter)
             rmRedunt.insert(*iter);
         verts[i].adjVerts.clear();

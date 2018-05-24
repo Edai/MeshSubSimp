@@ -17,7 +17,7 @@ class Vertex
 {
     public:
         Vector3D pos;
-        std::list<unsigned> adjVerts;
+        std::vector<unsigned> adjVerts;
         bool isBoundary;
 };
 
