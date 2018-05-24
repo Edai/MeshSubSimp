@@ -5,9 +5,61 @@
 #include "Application.hpp"
 #include "Mesh.hpp"
 
+unsigned Mesh::GetFourthVertex(unsigned f, unsigned i0, unsigned i1)
+{
+    for (auto &index : edge2Faces.find(std::make_pair(i0, i1)) == edge2Faces.end() ?
+                       edge2Faces[std::make_pair(i1, i0)] : edge2Faces[std::make_pair(i0, i1)])
+    {
+        for (unsigned i = 0; index != f && i < 3; i++)
+        {
+            unsigned n = faces[index].verts[i];
+            if (n != i0 && n != i1)
+                return n;
+        }
+    }
+    return (0);
+}
+
+Vertex* Mesh::GetOddVertices(unsigned f, unsigned i0, unsigned i1, unsigned i2)
+{
+    Vertex *v = new Vertex();
+    Vertex &v0 = verts[i0];
+    Vertex &v1 = verts[i1];
+
+    if (v0.isBoundary && v1.isBoundary)
+    {
+        v->pos = (v0.pos + v1.pos) * 0.5f;
+        v->isBoundary = true;
+    }
+    else
+    {
+        unsigned i3 = GetFourthVertex(f, i0, i1);
+        Vertex &v2 = verts[i2];
+        Vertex &v3 = verts[i3];
+        v->pos = 3.0/8.0 * (v0.pos + v1.pos) + 1.0/8.0 * (v2.pos + v3.pos);
+    }
+    //add faces
+    v->adjVerts.push_back(i0);
+    v->adjVerts.push_back(i1);
+    return (v);
+}
 
 void Mesh::LoopSubdivisionOneStep()
 {
+    Mesh *simplified_mesh = new Mesh();
+    std::vector<Vertex> *odd_vertexes = new std::vector<Vertex>();
+
+    for (int i = 0; i < faces.size(); i++)
+    {
+        Face &f = faces[i];
+        for (auto &v : f.verts)
+        {
+            odd_vertexes->push_back(*(GetOddVertices(i, f.verts[0], f.verts[1], f.verts[2])));
+            odd_vertexes->push_back(*(GetOddVertices(i, f.verts[0], f.verts[2], f.verts[1])));
+            odd_vertexes->push_back(*(GetOddVertices(i, f.verts[1], f.verts[2], f.verts[0])));
+        }
+    }
+    delete odd_vertexes;
     return;
 }
 
@@ -55,7 +107,6 @@ void Mesh::Load(const char* fileName)
             {
                 unsigned v0 = fmin(v[i], v[(i+1)%3]);
                 unsigned v1 = fmax(v[i], v[(i+1)%3]);
-
                 Edge2Faces::iterator iter = edge2Faces.find(std::make_pair(v0, v1));
                 if (iter == edge2Faces.end())
                 {
@@ -91,6 +142,7 @@ void Mesh::Load(const char* fileName)
             verts[iter->first.second].isBoundary = true;
         }
     }
+
 }
 
 void Mesh::Save(const char* fileName)
@@ -108,7 +160,7 @@ Vector3D Mesh::GetNormalTriangle(Face &f)
     Vector3D u = verts[f.verts[1]].pos - verts[f.verts[0]].pos;
     Vector3D v = verts[f.verts[2]].pos - verts[f.verts[0]].pos;
 
-    return Vector3D(u ^ v);
+    return (u ^ v);
 }
 
 void Mesh::Init()
