@@ -25,15 +25,14 @@ float beta(int n)
     if (n == 3)
         return (3.0f / 16.0f);
     else
-        return (3.0f / 8.0f * n);
+        return (3.0f / (8.0f * n));
 }
 
 Vertex* Mesh::GetEvenVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
 {
     Vertex *v = new Vertex();
-    *v = verts[0];
-
-    std::cout << "OLD " << v->pos.x << " "  << v->pos.y << " " << v->pos.z << std::endl;
+    *v = verts[i0];
+//    std::cout << "OLD : " << v->pos.x << " " << v->pos.y << " " << v->pos.z << std::endl;
     if (v->isBoundary)
     {
         v->pos = 1.0/8.0  * (verts[i1].pos  + verts[i2].pos) +
@@ -47,7 +46,7 @@ Vertex* Mesh::GetEvenVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
         v->pos *= (1.0 - v->adjVerts.size() * beta(v->adjVerts.size())) +
                 sum_beta * beta(v->adjVerts.size());
     }
-    std::cout << "NEW " << v->pos.x << " "  << v->pos.y << " " << v->pos.z << std::endl;
+//    std::cout << "NEW : " << v->pos.x << " " << v->pos.y << " " << v->pos.z << std::endl;
     return (v);
 }
 
