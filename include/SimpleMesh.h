@@ -19,13 +19,22 @@ class Vertex
         Vector3D pos;
         std::vector<unsigned> adjVerts;
         bool isBoundary;
+        bool isComputed = false;
+
+    Vertex &operator=(const Vertex& right)
+    {
+        for (unsigned i = 0; i < right.adjVerts.size(); ++i) adjVerts.push_back(right.adjVerts[i]);
+        pos = right.pos;
+        isBoundary = right.isBoundary;
+        return *this;
+    }
 };
 
 class Face
 {
     public:
         unsigned verts[3];
-
+        bool isComputed = false;
         unsigned vertOppositeTo(unsigned v0, unsigned v1)
         {
             assert(verts[0] == v0 || verts[1] == v0 || verts[2] == v0);

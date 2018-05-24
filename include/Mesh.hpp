@@ -27,7 +27,7 @@ public:
     Vertex *GetEvenVertex(unsigned, unsigned, unsigned, unsigned);
     void LoopSubdivisionOneStep();
     void Simplification();
-
+    void ResetComputing();
     unsigned int odd_GetFourthVertex(unsigned f, unsigned int i0, unsigned int i1);
 };
 

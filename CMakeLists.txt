@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 project(MeshSubSimp)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_executable(MeshSubSimp src/main.cpp src/Geometry.cpp include/Geometry.h include/SimpleMesh.h src/Mesh.cpp include/Mesh.hpp
                 include/Application.hpp include/Camera.hpp include/Engine.hpp include/GraphicalCore.hpp src/Application.cpp src/Camera.cpp src/Engine.cpp src/GraphicalCore.cpp)
