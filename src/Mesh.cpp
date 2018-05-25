@@ -4,22 +4,8 @@
 
 #include "Application.hpp"
 #include "Mesh.hpp"
+#include <algorithm>
 
-unsigned Mesh::odd_GetFourthVertex(unsigned f, unsigned i0, unsigned i1)
-{
-    for (auto &index : edge2Faces.find(std::make_pair(i0, i1)) == edge2Faces.end() ?
-                       edge2Faces[std::make_pair(i1, i0)] : edge2Faces[std::make_pair(i0, i1)])
-    {
-        for (unsigned i = 0; index != f && i < 3; i++)
-        {
-            unsigned n = faces[index].verts[i];
-            if (n != i0 && n != i1)
-                return n;
-        }
-    }
-    std::cerr << "Something wrong happened." << std::endl;
-    return (0);
-}
 
 float beta(int n)
 {
@@ -29,20 +15,14 @@ float beta(int n)
         return (3.0f / (8.0f * n));
 }
 
-void Mesh::ResetComputing()
-{
-    for (auto &v : verts)
-        v.isComputed = false;
-}
-
-Vertex* Mesh::GetEvenVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
+Vertex* Mesh::GetEvenVertex(unsigned i0, unsigned i1, std::vector<unsigned> &f)
 {
     Vertex *v = &verts[i0];
     v->isComputed = true;
-//    std::cout << "OLD : " << v->pos.x << " " << v->pos.y << " " << v->pos.z << std::endl;
+
     if (v->isBoundary)
     {
-        v->pos = 1.0/8.0  * (verts[i1].pos  + verts[i2].pos) +
+        v->pos = 1.0/8.0  * (verts[i0].pos  + verts[i1].pos) +
                 3.0/4.0 * v->pos;
     }
     else
@@ -53,11 +33,34 @@ Vertex* Mesh::GetEvenVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
         v->pos *= (1.0 - v->adjVerts.size() * beta(v->adjVerts.size())) +
                 sum_beta * beta(v->adjVerts.size());
     }
-//    std::cout << "NEW : " << v->pos.x << " " << v->pos.y << " " << v->pos.z << std::endl;
     return (v);
 }
 
-Vertex* Mesh::GetOddVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
+unsigned GetIndex(Face &f, unsigned i)
+{
+    auto it = std::find(f.verts, f.verts + 3, i);
+    if (it != f.verts + 3)
+    {
+        std::cout << std::abs(std::distance(f.verts, it)) <<  " ";
+        return std::abs(std::distance(f.verts, it));
+    }
+    return 42;
+}
+
+unsigned GetPosition(Face &face, unsigned i0, unsigned i1)
+{
+    unsigned indArr0 = GetIndex(face, i0);
+    unsigned indArr1 = GetIndex(face, i1);
+    std::cout << std::endl;
+    if (indArr0 == 0 && indArr1 == 1)
+        return (2);
+    else if (indArr0 == 0 && indArr1 == 2)
+        return (1);
+    else if (indArr0 == 1 && indArr1 == 2)
+        return (0);
+}
+
+Vertex* Mesh::GetOddVertex(unsigned i0, unsigned i1, std::vector<unsigned> &f)
 {
     Vertex *v = new Vertex();
     Vertex &v0 = verts[i0];
@@ -67,71 +70,47 @@ Vertex* Mesh::GetOddVertex(unsigned f, unsigned i0, unsigned i1, unsigned i2)
     {
         v->pos = (v0.pos + v1.pos) * 0.5f;
         v->isBoundary = true;
+        if (f.size() != 1)
+            std::cerr << "ERROR" << std::endl;
+        faces[f[0]].oddsVerts[GetPosition(faces[f[0]], i0, i1)] = v;
     }
     else
     {
-        unsigned i3 = odd_GetFourthVertex(f, i0, i1);
+        if (f.size() != 2)
+            std::cerr << "ERROR" << std::endl;
+        unsigned i2 = faces[f[0]].vertOppositeTo(i0, i1);
+        unsigned i3 = faces[f[1]].vertOppositeTo(i0, i1);
         Vertex &v2 = verts[i2];
         Vertex &v3 = verts[i3];
         v->pos = 3.0/8.0 * (v0.pos + v1.pos) + 1.0/8.0 * (v2.pos + v3.pos);
+       // faces[f[0]].oddsVerts[GetPosition(faces[f[0]], i0, i1)] = v;
+        std::cout << GetPosition(faces[f[0]], i0, i1) << std::endl;
+      //  faces[f[1]].oddsVerts[GetPosition(faces[f[1]], i0, i1)] = v;
+        std::cout << GetPosition(faces[f[1]], i0, i1) << std::endl;
     }
-    v->isComputed = true;
     v->adjVerts.push_back(i0);
     v->adjVerts.push_back(i1);
     return (v);
 }
 
-void ApplyIndexesFaces(Face &f, unsigned i0, unsigned i1, unsigned i2)
-{
-    f.isComputed = true;
-    f.verts[0] = i0;
-    f.verts[1] = i1;
-    f.verts[2] = i2;
-}
-
-# ifndef UX
-# define u0 verts.size() - 3
-# define u1 verts.size() - 2
-# define u2 verts.size() - 1
-
-#endif
-
 void Mesh::LoopSubdivisionOneStep()
 {
-    Vertex *evenVex[3];
-    Vertex *oddVex[3];
-    int nb_faces = faces.size();
-
-    ResetComputing();
-    for (int i = 0; i < nb_faces; i++)
+    // Computer all odd vertices for each edge
+    for (auto &e : edge2Faces)
     {
-        Face &f = faces[i];
-        unsigned indexes[] = {f.verts[0], f.verts[1], f.verts[2]};
-        Face nfaces[3];
-        if (!f.isComputed)
-        {
-            oddVex[0] = GetOddVertex(i, f.verts[0], f.verts[1], f.verts[2]);
-            oddVex[1] = GetOddVertex(i, f.verts[0], f.verts[2], f.verts[1]);
-            oddVex[2] = GetOddVertex(i, f.verts[1], f.verts[2], f.verts[0]);
-
-            if (!verts[f.verts[0]].isComputed)
-                evenVex[0] = GetEvenVertex(i, f.verts[0], f.verts[1], f.verts[2]);
-            if (!verts[f.verts[1]].isComputed)
-                evenVex[1] = GetEvenVertex(i, f.verts[1], f.verts[0], f.verts[2]);
-            if (!verts[f.verts[2]].isComputed)
-                evenVex[2] = GetEvenVertex(i, f.verts[2], f.verts[0], f.verts[1]);
-            verts.push_back(*oddVex[0]); // verts.size() - 3
-            verts.push_back(*oddVex[1]); // verts.size() - 2
-            verts.push_back(*oddVex[2]); // verts.size() - 1
-
-            ApplyIndexesFaces(f, indexes[0], u1, u0);
-            ApplyIndexesFaces(nfaces[0], indexes[2], u1, u2);
-            ApplyIndexesFaces(nfaces[1], u0, u1, u2);
-            ApplyIndexesFaces(nfaces[2], indexes[1], u0, u2);
-            faces.push_back(nfaces[0]);
-            faces.push_back(nfaces[1]);
-            faces.push_back(nfaces[2]);
-        }
+        unsigned i0 = e.first.first;
+        unsigned i1 = e.first.second;
+        verts.emplace_back(*GetOddVertex(i0, i1, e.second));
+    }
+    for (auto &f : faces)
+    {
+//        std::cout << f.oddsVerts[0] << " " << f.oddsVerts[1] << " " << f.oddsVerts[2] << std::endl;
+    }
+    for (auto &e : edge2Faces)
+    {
+        unsigned i0 = e.first.first;
+        unsigned i1 = e.first.second;
+        GetEvenVertex(i0, i1, e.second);
     }
 }
 
@@ -271,3 +250,29 @@ void Mesh::Render()
     if (rot > 360)
         rot -= 360;
 }
+//        Face &f = faces[i];
+//        unsigned indexes[] = {f.verts[0], f.verts[1], f.verts[2]};
+//        Face nfaces[3];
+//        if (!f.isComputed)
+//        {
+//            oddVex[0] = GetOddVertex(i, f.verts[0], f.verts[1], f.verts[2]);
+//            oddVex[1] = GetOddVertex(i, f.verts[0], f.verts[2], f.verts[1]);
+//            oddVex[2] = GetOddVertex(i, f.verts[1], f.verts[2], f.verts[0]);
+//
+//            if (!verts[f.verts[0]].isComputed)
+//                evenVex[0] = GetEvenVertex(i, f.verts[0], f.verts[1], f.verts[2]);
+//            if (!verts[f.verts[1]].isComputed)
+//                evenVex[1] = GetEvenVertex(i, f.verts[1], f.verts[0], f.verts[2]);
+//            if (!verts[f.verts[2]].isComputed)
+//                evenVex[2] = GetEvenVertex(i, f.verts[2], f.verts[0], f.verts[1]);
+//            verts.push_back(*oddVex[0]); // verts.size() - 3
+//            verts.push_back(*oddVex[1]); // verts.size() - 2
+//            verts.push_back(*oddVex[2]); // verts.size() - 1
+//
+//            ApplyIndexesFaces(f, indexes[0], u1, u0);
+//            ApplyIndexesFaces(nfaces[0], indexes[2], u1, u2);
+//            ApplyIndexesFaces(nfaces[1], u0, u1, u2);
+//            ApplyIndexesFaces(nfaces[2], indexes[1], u0, u2);
+//            faces.push_back(nfaces[0]);
+//            faces.push_back(nfaces[1]);
+//            faces.push_back(nfaces[2]);

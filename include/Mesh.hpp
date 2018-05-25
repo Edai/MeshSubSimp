@@ -23,8 +23,8 @@ public:
     void Load(const char* fileName);
     void Save(const char* fileName);
     Vector3D GetNormalTriangle(Face &);
-    Vertex *GetOddVertex(unsigned, unsigned, unsigned, unsigned);
-    Vertex *GetEvenVertex(unsigned, unsigned, unsigned, unsigned);
+    Vertex *GetOddVertex(unsigned, unsigned, std::vector<unsigned> &);
+    Vertex *GetEvenVertex(unsigned, unsigned, std::vector<unsigned> &);
     void LoopSubdivisionOneStep();
     void Simplification();
     void ResetComputing();
