@@ -92,7 +92,7 @@ int Application::MeshProcess(Options *op)
     }
     clock_t end = clock();
     std::cout << "Time consumed: " << (double)(end - start) / (double)CLOCKS_PER_SEC << std::endl;
-    std::string output_file = (op->obj_file.substr(0, op->obj_file.rfind(".")) + ".loop.obj").c_str();
+    std::string output_file = (op->obj_file.substr(0, op->obj_file.rfind(".")) + ".loop" + std::to_string(op->iterations) + ".obj").c_str();
     mesh->Save(output_file.c_str());
     std::cout << "Processing finished, output file : " << output_file << std::endl;
     GraphicalCore::Instance()->meshes.push_back(*mesh);
