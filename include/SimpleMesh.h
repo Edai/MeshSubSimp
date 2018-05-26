@@ -20,6 +20,7 @@ class Vertex
         std::vector<unsigned> adjVerts;
         bool isBoundary;
         bool isComputed = false;
+        unsigned index = 0;
 
     Vertex &operator=(const Vertex& right)
     {
@@ -35,6 +36,13 @@ class Face
     public:
         unsigned verts[3];
         Vertex *oddsVerts[3];
+
+        Face()
+        {
+            oddsVerts[0] = nullptr;
+            oddsVerts[1] = nullptr;
+            oddsVerts[2] = nullptr;
+        }
 
         unsigned vertOppositeTo(unsigned v0, unsigned v1)
         {

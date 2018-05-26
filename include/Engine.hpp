@@ -35,7 +35,6 @@ public:
         }
         return instance;
     }
-
 #pragma END SINGLETON
 
 };

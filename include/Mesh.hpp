@@ -24,7 +24,7 @@ public:
     void Save(const char* fileName);
     Vector3D GetNormalTriangle(Face &);
     Vertex *GetOddVertex(unsigned, unsigned, std::vector<unsigned> &);
-    Vertex *GetEvenVertex(unsigned, unsigned, std::vector<unsigned> &);
+    void GetEvenVertex(unsigned i0);
     void LoopSubdivisionOneStep();
     void Simplification();
     void ResetComputing();
