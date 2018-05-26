@@ -260,6 +260,8 @@ void Mesh::Save(const char *fileName)
     for (unsigned i = 0; i < faces.size(); ++i)
         output << "f " << faces[i].verts[0] + 1 << " " << faces[i].verts[1] + 1 << " " << faces[i].verts[2] + 1
                << std::endl;
+    std::cout << "Verts: " << verts.size() << std::endl;
+    std::cout << "Faces: " << faces.size() << std::endl;
     output.close();
 }
 
