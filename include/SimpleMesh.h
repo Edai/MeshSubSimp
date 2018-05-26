@@ -19,7 +19,6 @@ class Vertex
         Vector3D pos;
         std::vector<unsigned> adjVerts;
         bool isBoundary;
-        bool isComputed = false;
         unsigned index = 0;
 
     Vertex &operator=(const Vertex& right)

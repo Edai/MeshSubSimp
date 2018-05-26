@@ -22,7 +22,7 @@
 #define WINDOWPOS_Y 50
 #define WINDOW_TITLE "Valentin KAO - 2017280242"
 #define DEFAULT_OBJ "resources/cube.obj"
-#define DEFAULT_ITERATIONS 1
+#define DEFAULT_ITERATIONS 3
 
 struct Options
 {

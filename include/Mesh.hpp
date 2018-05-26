@@ -22,13 +22,15 @@ public:
 
     void Load(const char* fileName);
     void Save(const char* fileName);
-    Vector3D GetNormalTriangle(Face &);
-    Vertex *GetOddVertex(unsigned, unsigned, std::vector<unsigned> &);
-    void GetEvenVertex(unsigned i0);
     void LoopSubdivisionOneStep();
     void Simplification();
+
+private:
     void ResetComputing();
-    unsigned int odd_GetFourthVertex(unsigned f, unsigned int i0, unsigned int i1);
+    void RecomputeEdgeToFaces(Face &, unsigned);
+    Vector3D GetNormalTriangle(Face &);
+    Vertex *CalculateOddVertex(unsigned, unsigned, std::vector<unsigned> &);
+    void CalculateEvenVertex(unsigned);
 };
 
 
