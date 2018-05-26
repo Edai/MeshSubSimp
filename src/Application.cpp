@@ -19,10 +19,11 @@ bool Application::Parse(Options *options, int ac, char** av)
                     {"title",  required_argument, nullptr, 't'},
                     {"object",  required_argument, nullptr, 'o'},
                     {"iteration",  required_argument, nullptr, 'i'},
+                    {"simplification",  optional_argument, nullptr, 's'},
                     {nullptr, 0,                  nullptr, 0}
             };
     int option_index = 0;
-    int c = getopt_long_only(ac, av, "h:w:t:o:i:",
+    int c = getopt_long_only(ac, av, "h:w:t:o:i:s:",
                          long_options, &option_index);
     while (c > 0)
     {
@@ -43,10 +44,14 @@ bool Application::Parse(Options *options, int ac, char** av)
             case 'i':
                 options->iterations = atoi(optarg);
                 break;
+            case 's':
+                if (std::string(optarg) == "true")
+                    options->simplification = true;
+                break;
             default:
                 return (false);
         }
-        c = getopt_long_only(ac, av, "h:w:t:o:i:",
+        c = getopt_long_only(ac, av, "h:w:t:o:i:s:",
                              long_options, &option_index);
     }
     if (options->window_name.empty())
@@ -74,8 +79,16 @@ int Application::MeshProcess(Options *op)
     clock_t start = clock();
     for (unsigned i = 0; i < op->iterations; ++i)
     {
-        std::cout << "Iteration " << i << std::endl;
-        mesh->LoopSubdivisionOneStep();
+        if (!op->simplification)
+        {
+            std::cout << "Subdivision - Iteration " << i << std::endl;
+            mesh->LoopSubdivisionOneStep();
+        }
+        else
+        {
+            std::cout << "Simplification - Iteration " << i << std::endl;
+            mesh->Simplification();
+        }
     }
     clock_t end = clock();
     std::cout << "Time consumed: " << (double)(end - start) / (double)CLOCKS_PER_SEC << std::endl;
@@ -91,8 +104,16 @@ int Application::Start(int ac, char **av)
     auto *options = new Options();
     auto *gc = GraphicalCore::Instance();
 
-    if (!Parse(options, ac, av))
+    try
+    {
+        if (!Parse(options, ac, av))
+            return (-1);
+    }
+    catch (...)
+    {
+        std::cerr << "Parsing fail..." << std::endl;
         return (-1);
+    }
     MeshProcess(options);
     if (!gc->Run(ac, av, options))
         return (-1);

@@ -21,7 +21,7 @@
 #define WINDOWPOS_X 500
 #define WINDOWPOS_Y 50
 #define WINDOW_TITLE "Valentin KAO - 2017280242"
-#define DEFAULT_OBJ "resources/cube.obj"
+#define DEFAULT_OBJ "resources/kitten.obj"
 #define DEFAULT_ITERATIONS 3
 
 struct Options
@@ -31,10 +31,12 @@ struct Options
     int                 height;
     unsigned int        iterations;
     std::string         obj_file;
+    bool                simplification;
 
 public:
     Options()
     {
+        simplification = false;
         width = DEFAULT_WIDTH;
         height = DEFAULT_HEIGHT;
         iterations = DEFAULT_ITERATIONS;

@@ -17,12 +17,12 @@ void Camera::Update()
     pitchQ = glm::angleAxis(pitch, glm::cross(dir, glm::vec3(0, 1, 0)));
     headingQ = glm::angleAxis(heading, glm::vec3(0, 1, 0));
     dir = glm::rotate(glm::normalize(glm::cross(pitchQ, headingQ)), dir);
+    position += posDelta * 2.0f;
     lookAt = position + dir * speed;
     posDelta = posDelta * speed;
     heading *= speed;
     pitch *= speed;
 
-    position += posDelta;
     projectMatrix = glm::perspective(fov, aspect, 0.1, 5000.0);
     viewMatrix = glm::lookAt(position, lookAt, glm::vec3(0, 1, 0));
 
