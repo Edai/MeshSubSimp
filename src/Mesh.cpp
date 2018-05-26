@@ -18,9 +18,9 @@ static unsigned GetPosition(Face &face, unsigned i0, unsigned i1)
 {
     unsigned indArr0 = GetIndex(face, i0);
     unsigned indArr1 = GetIndex(face, i1);
-    if ((indArr0 == 0 && indArr1 == 1 ) || (indArr0 == 1 && indArr1 == 0))
+    if ((indArr0 == 0 && indArr1 == 1) || (indArr0 == 1 && indArr1 == 0))
         return (2);
-    else if ((indArr0 == 0 && indArr1 == 2) ||(indArr0 == 2 && indArr1 == 0))
+    else if ((indArr0 == 0 && indArr1 == 2) || (indArr0 == 2 && indArr1 == 0))
         return (1);
     else
         return (0);
@@ -33,7 +33,7 @@ static void ApplyFaceVerts(Face &f, unsigned i0, unsigned i1, unsigned i2)
     f.verts[2] = i2;
 }
 
-Vertex* Mesh::CalculateOddVertex(unsigned i0, unsigned i1, std::vector<unsigned> &f)
+Vertex *Mesh::CalculateOddVertex(unsigned i0, unsigned i1, std::vector<unsigned> &f)
 {
     Vertex *v = new Vertex();
     Vertex &v0 = verts[i0];
@@ -46,8 +46,7 @@ Vertex* Mesh::CalculateOddVertex(unsigned i0, unsigned i1, std::vector<unsigned>
         if (f.size() != 1)
             std::cerr << "ERROR" << std::endl;
         faces[f[0]].oddsVerts[GetPosition(faces[f[0]], i0, i1)] = v;
-    }
-    else
+    } else
     {
         if (f.size() != 2)
             std::cerr << "ERROR" << std::endl;
@@ -55,7 +54,7 @@ Vertex* Mesh::CalculateOddVertex(unsigned i0, unsigned i1, std::vector<unsigned>
         unsigned i3 = faces[f[1]].vertOppositeTo(i0, i1);
         Vertex &v2 = verts[i2];
         Vertex &v3 = verts[i3];
-        v->pos = 3.0/8.0 * (v0.pos + v1.pos) + 1.0/8.0 * (v2.pos + v3.pos);
+        v->pos = 3.0 / 8.0 * (v0.pos + v1.pos) + 1.0 / 8.0 * (v2.pos + v3.pos);
         faces[f[0]].oddsVerts[GetPosition(faces[f[0]], i0, i1)] = v;
         faces[f[1]].oddsVerts[GetPosition(faces[f[1]], i0, i1)] = v;
     }
@@ -67,18 +66,17 @@ void Mesh::RecomputeEdgeToFaces(Face &f, unsigned index)
 {
     for (unsigned i = 0; i < 3; ++i)
     {
-        unsigned v0 = fmin(f.verts[i], f.verts[(i+1)%3]);
-        unsigned v1 = fmax(f.verts[i], f.verts[(i+1)%3]);
+        unsigned v0 = fmin(f.verts[i], f.verts[(i + 1) % 3]);
+        unsigned v1 = fmax(f.verts[i], f.verts[(i + 1) % 3]);
         Edge2Faces::iterator iter = edge2Faces.find(std::make_pair(v0, v1));
         if (iter == edge2Faces.end())
         {
             std::vector<unsigned> curFaces;
             curFaces.push_back(index);
             edge2Faces[std::make_pair(v0, v1)] = curFaces;
-        }
-        else
-             edge2Faces[std::make_pair(v0, v1)].push_back(index);
-     }
+        } else
+            edge2Faces[std::make_pair(v0, v1)].push_back(index);
+    }
 }
 
 void Mesh::ResetComputing()
@@ -95,9 +93,12 @@ void Mesh::ResetComputing()
     for (unsigned i = 0; i < faces.size(); i++)
     {
         Face &f = faces[i];
-        verts[f.verts[0]].adjVerts.push_back(f.verts[1]); verts[f.verts[0]].adjVerts.push_back(f.verts[2]);
-        verts[f.verts[1]].adjVerts.push_back(f.verts[0]); verts[f.verts[1]].adjVerts.push_back(f.verts[2]);
-        verts[f.verts[2]].adjVerts.push_back(f.verts[0]); verts[f.verts[2]].adjVerts.push_back(f.verts[1]);
+        verts[f.verts[0]].adjVerts.push_back(f.verts[1]);
+        verts[f.verts[0]].adjVerts.push_back(f.verts[2]);
+        verts[f.verts[1]].adjVerts.push_back(f.verts[0]);
+        verts[f.verts[1]].adjVerts.push_back(f.verts[2]);
+        verts[f.verts[2]].adjVerts.push_back(f.verts[0]);
+        verts[f.verts[2]].adjVerts.push_back(f.verts[1]);
         for (unsigned j = 0; j < 3; ++j)
             faces[i].oddsVerts[j] = 0;
         RecomputeEdgeToFaces(f, i);
@@ -121,11 +122,11 @@ void Mesh::CalculateEvenVertex(unsigned i0)
     Vector3D sum;
     auto n = v->adjVerts.size();
     double beta = (1.0 / n) * ((5.0 / 8.0) - \
-                powf((3.0/8.0 + 0.25 * cos(2.0 * M_PI/n)), 2.0f));
+                powf((3.0 / 8.0 + 0.25 * cos(2.0 * M_PI / n)), 2.0f));
 
     for (auto i : v->adjVerts)
         sum += verts[i].pos;
-    v->pos = v->pos * (1.0 -  n * beta) + sum * beta;
+    v->pos = v->pos * (1.0 - n * beta) + sum * beta;
 }
 
 void Mesh::LoopSubdivisionOneStep()
@@ -149,9 +150,12 @@ void Mesh::LoopSubdivisionOneStep()
         unsigned i1 = f.verts[1];
         unsigned i2 = f.verts[2];
         ApplyFaceVerts(f, f.oddsVerts[2]->index, f.oddsVerts[0]->index, f.oddsVerts[1]->index);
-        Face f1; ApplyFaceVerts(f1, i0, f.oddsVerts[2]->index, f.oddsVerts[1]->index);
-        Face f2; ApplyFaceVerts(f2, f.oddsVerts[2]->index, i1, f.oddsVerts[0]->index);
-        Face f3; ApplyFaceVerts(f3, f.oddsVerts[1]->index, f.oddsVerts[0]->index,  i2);
+        Face f1;
+        ApplyFaceVerts(f1, i0, f.oddsVerts[2]->index, f.oddsVerts[1]->index);
+        Face f2;
+        ApplyFaceVerts(f2, f.oddsVerts[2]->index, i1, f.oddsVerts[0]->index);
+        Face f3;
+        ApplyFaceVerts(f3, f.oddsVerts[1]->index, f.oddsVerts[0]->index, i2);
         faces.push_back(f1);
         faces.push_back(f2);
         faces.push_back(f3);
@@ -160,10 +164,16 @@ void Mesh::LoopSubdivisionOneStep()
 
 void Mesh::Simplification()
 {
+    unsigned nbFaces = faces.size();
+    unsigned nbVerts = verts.size();
+    std::vector<Vertex> newVerts;
+    std::vector<Face> newFaces;
+
+    Mesh::ResetComputing();
     return;
 }
 
-void Mesh::Load(const char* fileName)
+void Mesh::Load(const char *fileName)
 {
     std::ifstream input(fileName);
     std::stringstream sin;
@@ -177,26 +187,35 @@ void Mesh::Load(const char* fileName)
     {
         if (curLine.substr(0, 2) == "v ")
         {
-            sin.clear(); sin << curLine;
+            sin.clear();
+            sin << curLine;
             sin >> t >> p.x >> p.y >> p.z;
             Vertex v;
-            v.pos = p; v.isBoundary = false;
+            v.pos = p;
+            v.isBoundary = false;
             verts.push_back(v);
-        }
-        else if (curLine.substr(0, 2) == "f ")
+        } else if (curLine.substr(0, 2) == "f ")
         {
             if (curLine.find("/") != std::string::npos)
                 sscanf(curLine.c_str(), "f %d/%d %d/%d %d/%d", &v[0], &tcoord[0], &v[1], &tcoord[1], &v[2], &tcoord[2]);
             else
                 sscanf(curLine.c_str(), "f %d %d %d", &v[0], &v[1], &v[2]);
 
-            --v[0]; --v[1]; --v[2];
-            Face f; f.verts[0] = v[0]; f.verts[1] = v[1]; f.verts[2] = v[2];
+            --v[0];
+            --v[1];
+            --v[2];
+            Face f;
+            f.verts[0] = v[0];
+            f.verts[1] = v[1];
+            f.verts[2] = v[2];
             faces.push_back(f);
 
-            verts[v[0]].adjVerts.push_back(v[1]); verts[v[0]].adjVerts.push_back(v[2]);
-            verts[v[1]].adjVerts.push_back(v[0]); verts[v[1]].adjVerts.push_back(v[2]);
-            verts[v[2]].adjVerts.push_back(v[0]); verts[v[2]].adjVerts.push_back(v[1]);
+            verts[v[0]].adjVerts.push_back(v[1]);
+            verts[v[0]].adjVerts.push_back(v[2]);
+            verts[v[1]].adjVerts.push_back(v[0]);
+            verts[v[1]].adjVerts.push_back(v[2]);
+            verts[v[2]].adjVerts.push_back(v[0]);
+            verts[v[2]].adjVerts.push_back(v[1]);
         }
     }
     for (unsigned i = 0; i < verts.size(); ++i)
@@ -221,13 +240,14 @@ void Mesh::Load(const char* fileName)
 
 }
 
-void Mesh::Save(const char* fileName)
+void Mesh::Save(const char *fileName)
 {
     std::ofstream output(fileName);
     for (unsigned i = 0; i < verts.size(); ++i)
         output << "v " << verts[i].pos.x << " " << verts[i].pos.y << " " << verts[i].pos.z << std::endl;
     for (unsigned i = 0; i < faces.size(); ++i)
-        output << "f " << faces[i].verts[0]+1 << " " << faces[i].verts[1]+1 << " " << faces[i].verts[2]+1 << std::endl;
+        output << "f " << faces[i].verts[0] + 1 << " " << faces[i].verts[1] + 1 << " " << faces[i].verts[2] + 1
+               << std::endl;
     output.close();
 }
 
@@ -268,7 +288,7 @@ void Mesh::Render()
     glPushMatrix();
     glTranslatef(0, -2.0f, 6.5f);
     glColor4f(1.0, 0.33, 0.33, 1.0);
-    glRotatef(rot, 0.0,1.0,0.0);
+    glRotatef(rot, 0.0, 1.0, 0.0);
     glCallList(glist);
     glPopMatrix();
 
