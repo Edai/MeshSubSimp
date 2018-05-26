@@ -31,6 +31,8 @@ private:
     Vector3D GetNormalTriangle(Face &);
     Vertex *CalculateOddVertex(unsigned, unsigned, std::vector<unsigned> &);
     void CalculateEvenVertex(unsigned);
+
+    void ComputeErrorMetric();
 };
 
 

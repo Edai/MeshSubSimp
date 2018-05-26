@@ -5,6 +5,9 @@
 #include "Application.hpp"
 #include "Mesh.hpp"
 #include <algorithm>
+#include <glm.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 static unsigned GetIndex(Face &f, unsigned i)
 {
@@ -162,6 +165,16 @@ void Mesh::LoopSubdivisionOneStep()
     }
 }
 
+void Mesh::ComputeErrorMetric()
+{
+    std::vector<glm::mat4x4> qs(faces.size());
+
+    for (unsigned i = 0; i < faces.size(); i++)
+    {
+        return;
+    }
+}
+
 void Mesh::Simplification()
 {
     unsigned nbFaces = faces.size();
@@ -169,8 +182,7 @@ void Mesh::Simplification()
     std::vector<Vertex> newVerts;
     std::vector<Face> newFaces;
 
-    Mesh::ResetComputing();
-    return;
+    throw std::logic_error("Mesh simplification not implemented");
 }
 
 void Mesh::Load(const char *fileName)
